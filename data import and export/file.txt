@@ -1,0 +1,50 @@
+const csvInput = document.getElementById('csv');
+const exportBtn = document.getElementById('btn');
+const table = document.getElementById('table');
+
+// 1. Handle File Upload using Promises
+csvInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+        // Modern way to read text instead of new FileReader()
+        const text = await file.text();
+        
+        // Parse rows and columns
+        const data = text.trim().split('\n').map(row => row.split(','));
+
+        // 2. Modern Rendering using Template Literals
+        // This is much faster as it updates the DOM once
+        table.innerHTML = data.map(row => `
+            <tr>
+                ${row.map(cell => `<td>${cell}</td>`).join('')}
+            </tr>
+        `).join('');
+
+        csvInput.hidden = true;
+        exportBtn.style.display = 'block';
+    } catch (err) {
+        console.error("Error reading file:", err);
+    }
+});
+
+// 3. Export using Modern Download Logic
+exportBtn.addEventListener('click', () => {
+    const rows = Array.from(table.querySelectorAll('tr'));
+    
+    const csvContent = rows.map(tr => {
+        const cells = Array.from(tr.querySelectorAll('td'));
+        return cells.map(td => td.textContent).join(',');
+    }).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    
+    // Minimalist anchor click
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'modern_export.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+});
