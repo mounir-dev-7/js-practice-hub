@@ -41,6 +41,16 @@ button.addEventListener('click' , () => {
             rowContent += col.textContent + ','            
         }
         
+        csvContent += rowContent.slice(0 , -1) + '\n'
     }
+
+    const blob = new Blob([csvContent] , { type : 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
     
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'data.csv'
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
 })
